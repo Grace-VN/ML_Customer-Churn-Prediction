@@ -2,6 +2,8 @@ import optuna
 from catboost import CatBoostClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
+from data_processing.train_test_split import X_temp, y_temp, X_test, y_test
+from model.models import preprocessor, skf
 
 def objective(trial):
     params = {
