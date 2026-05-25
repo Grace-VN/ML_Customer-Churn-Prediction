@@ -1,0 +1,2 @@
+original_shape,transformed_shape,n_numerical,n_categorical_raw,n_encoded,n_passthrough,n_total_features
+"(12000, 10)","(12000, 11)",6,2,3,2,11

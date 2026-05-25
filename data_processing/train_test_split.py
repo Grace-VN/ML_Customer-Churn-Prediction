@@ -1,52 +1,210 @@
 # ============================================
-# 8. Feature Selection & Data Splitting
+# Customer Churn Prediction Pipeline
+# Local VS Code Version
 # ============================================
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+import warnings
+
+# --------------------------------------------
+# Settings
+# --------------------------------------------
+warnings.filterwarnings('ignore')
+sns.set_theme(style="whitegrid")
+
+# ==============================
+# Output Paths
+# ==============================
+CSV_DIR   = r"D:\Job\Portfolio\Machine Learning\Customer Churn Prediction\output_storage\csv_files"
+IMAGE_DIR = r"D:\Job\Portfolio\Machine Learning\Customer Churn Prediction\output_storage\images"
+os.makedirs(CSV_DIR,   exist_ok=True)
+os.makedirs(IMAGE_DIR, exist_ok=True)
+
+# ============================================
+# 1. Problem Definition
+# ============================================
+"""
+Business Context:
+    Customer churn is expensive for companies because acquiring
+    new customers costs significantly more than retaining existing ones.
+Goal:
+    Predict whether a customer is likely to leave the service
+    so the company can take preventive action.
+"""
+
+# ============================================
+# 2. Data Loading
+# ============================================
+DATA_PATH = r"D:\Job\Portfolio\Machine Learning\Customer Churn Prediction\data_processing\train.csv"
+df = pd.read_csv(DATA_PATH)
+
+print("=" * 50)
+print("Dataset Loaded Successfully")
+print("=" * 50)
+print(f"\nDataset Shape: {df.shape}")
+print("\nFirst 5 Rows:")
+print(df.head())
+
+# ============================================
+# 3. Basic Dataset Information
+# ============================================
+print("\nDataset Information:")
+print(df.info())
+
+print("\nMissing Values:")
+missing = df.isnull().sum()
+print(missing)
+
+print("\nStatistical Summary:")
+stats = df.describe().T
+print(stats)
+
+# --- Missing Values → CSV ---
+missing_df          = missing.reset_index()
+missing_df.columns  = ["feature", "missing_count"]
+missing_df["missing_pct"] = (missing_df["missing_count"] / len(df) * 100).round(4)
+missing_path        = os.path.join(CSV_DIR, "eda_missing_values.csv")
+missing_df.to_csv(missing_path, index=False)
+print(f"\n[Saved] Missing values          → {missing_path}")
+
+# --- Statistical Summary → CSV ---
+stats_path = os.path.join(CSV_DIR, "eda_statistical_summary.csv")
+stats.to_csv(stats_path)
+print(f"[Saved] Statistical summary     → {stats_path}")
+
+# ============================================
+# 4. Target Variable Analysis
+# ============================================
+target_col   = 'Exited'
+churn_counts = df[target_col].value_counts(normalize=True).round(3) * 100
+
+print("\nTarget Distribution:")
+print(f"Retained Customers (0): {churn_counts[0]:.1f}%")
+print(f"Churned Customers  (1): {churn_counts[1]:.1f}%")
+
+# --- Target Distribution → CSV ---
+# Build target_df cleanly from the raw df — never from describe() or value_counts()
+target_df = pd.DataFrame({
+    "class": [0, 1],
+    "label": ["Retained", "Churned"],
+    "count": [
+        int((df[target_col] == 0).sum()),
+        int((df[target_col] == 1).sum())
+    ]
+})
+target_df["pct"] = (target_df["count"] / len(df) * 100).round(2)
+
+target_path = os.path.join(CSV_DIR, "eda_target_distribution.csv")
+target_df.to_csv(target_path, index=False)
+print(f"[Saved] Target distribution     → {target_path}")
+
+# --- Churn Distribution Plot → Image ---
+fig, ax = plt.subplots(figsize=(6, 4))
+sns.countplot(x=df[target_col], ax=ax)
+ax.set_title("Customer Churn Distribution")
+ax.set_xlabel("Exited")
+ax.set_ylabel("Count")
+plt.tight_layout()
+
+churn_img_path = os.path.join(IMAGE_DIR, "eda_churn_distribution.png")
+fig.savefig(churn_img_path, dpi=150, bbox_inches='tight')
+print(f"[Saved] Churn distribution plot → {churn_img_path}")
+plt.show()
+plt.close()
+
+# ============================================
+# 5. Numerical Feature Analysis
+# ============================================
+numerical_cols = df.select_dtypes(include=np.number).columns
+
+fig = df[numerical_cols].hist(figsize=(15, 10), bins=30)
+plt.suptitle("Numerical Feature Distributions")
+plt.tight_layout()
+
+hist_img_path = os.path.join(IMAGE_DIR, "eda_numerical_distributions.png")
+plt.savefig(hist_img_path, dpi=150, bbox_inches='tight')
+print(f"[Saved] Numerical distributions → {hist_img_path}")
+plt.show()
+plt.close()
+
+# ============================================
+# 6. Correlation Heatmap
+# ============================================
+correlation_matrix = df[numerical_cols].corr()
+
+# --- Correlation Matrix → CSV ---
+corr_path = os.path.join(CSV_DIR, "eda_correlation_matrix.csv")
+correlation_matrix.to_csv(corr_path)
+print(f"[Saved] Correlation matrix      → {corr_path}")
+
+# --- Correlation Heatmap → Image ---
+fig, ax = plt.subplots(figsize=(12, 8))
+sns.heatmap(
+    correlation_matrix,
+    annot=False,
+    cmap='coolwarm',
+    linewidths=0.5,
+    ax=ax
+)
+ax.set_title("Feature Correlation Heatmap")
+plt.tight_layout()
+
+heatmap_img_path = os.path.join(IMAGE_DIR, "eda_correlation_heatmap.png")
+fig.savefig(heatmap_img_path, dpi=150, bbox_inches='tight')
+print(f"[Saved] Correlation heatmap     → {heatmap_img_path}")
+plt.show()
+plt.close()
+
+# ============================================
+# 7. Save Processed Copy
+# ============================================
+output_path = r"D:\Job\Portfolio\Machine Learning\Customer Churn Prediction\output_storage\csv_files\processed_train.csv"
+df.to_csv(output_path, index=False)
+print(f"\n[Saved] Processed dataset       → {output_path}")
 
 from sklearn.model_selection import train_test_split
+import os
+import pandas as pd
 
-# Remove non-informative identifier columns
+# ==============================
+# Output Paths
+# ==============================
+CSV_DIR = r"D:\Job\Portfolio\Machine Learning\Customer Churn Prediction\output_storage\csv_files"
+os.makedirs(CSV_DIR, exist_ok=True)
+
+# ==============================
+# Feature Engineering
+# ==============================
 df_clean = df.drop(columns=['id', 'CustomerId', 'Surname'])
 
-# Separate features and target variable
 X = df_clean.drop(columns=['Exited'])
 y = df_clean['Exited']
 
-# --------------------------------------------
+# ==============================
 # Train / Test Split
-# --------------------------------------------
-"""
-X_temp:
-    Used for model training, cross-validation,
-    and hyperparameter optimization.
-
-X_test:
-    Completely untouched hold-out dataset
-    reserved for final evaluation only.
-"""
-
+# ==============================
 X_temp, X_test, y_temp, y_test = train_test_split(
-    X,
-    y,
+    X, y,
     test_size=0.20,
     random_state=42,
     stratify=y
 )
 
-# ============================================
-# Split Summary
-# ============================================
+print(f"Optimization and Cross-Validation data (X_temp): {X_temp.shape}")
+print(f"UNTOUCHED Final Hold-Out Test data    (X_test):  {X_test.shape}")
 
-print("=" * 50)
-print("Data Splitting Completed")
-print("=" * 50)
+# ==============================
+# Save Splits → CSV
+# ==============================
+X_temp.to_csv(os.path.join(CSV_DIR, "X_temp.csv"), index=False)
+X_test.to_csv(os.path.join(CSV_DIR, "X_test.csv"), index=False)
+y_temp.to_csv(os.path.join(CSV_DIR, "y_temp.csv"), index=False)
+y_test.to_csv(os.path.join(CSV_DIR, "y_test.csv"), index=False)
 
-print(f"\nTraining & Validation Set Shape : {X_temp.shape}")
-print(f"Final Hold-Out Test Set Shape   : {X_test.shape}")
-
-# Check target balance preservation
-train_churn_rate = y_temp.mean() * 100
-test_churn_rate = y_test.mean() * 100
-
-print("\nTarget Distribution:")
-print(f"Training Set Churn Rate : {train_churn_rate:.2f}%")
-print(f"Test Set Churn Rate     : {test_churn_rate:.2f}%")
+print("\n[Saved] X_temp → X_temp.csv")
+print("[Saved] X_test → X_test.csv")
+print("[Saved] y_temp → y_temp.csv")
+print("[Saved] y_test → y_test.csv")

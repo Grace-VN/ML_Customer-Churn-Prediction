@@ -1,0 +1,12 @@
+feature,type
+CreditScore,numerical
+Age,numerical
+Tenure,numerical
+Balance,numerical
+NumOfProducts,numerical
+EstimatedSalary,numerical
+Geography_Germany,categorical_encoded
+Geography_Spain,categorical_encoded
+Gender_Male,categorical_encoded
+HasCrCard,passthrough
+IsActiveMember,passthrough

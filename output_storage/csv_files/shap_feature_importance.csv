@@ -1,0 +1,12 @@
+feature,mean_abs_shap
+num__NumOfProducts,1.2546507201812396
+num__Age,1.0577510823784475
+remainder__IsActiveMember,0.5224204189552637
+cat__Gender_Male,0.4055507097183441
+cat__Geography_Germany,0.3008709506866975
+num__Balance,0.21173367482019054
+num__CreditScore,0.10114762054556754
+num__EstimatedSalary,0.08138115232159024
+num__Tenure,0.05719851531279847
+remainder__HasCrCard,0.008645761470810143
+cat__Geography_Spain,0.003188517706392741
