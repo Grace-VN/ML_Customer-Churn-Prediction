@@ -67,22 +67,25 @@ This is an end-to-end supervised binary classification pipeline built in Python.
 ```
 ML_Customer-Churn-Prediction/
 │
-├── run.py                        # 🚀 Entry point — orchestrates the full pipeline
+├── run.py
+│   ├── EDA.py                 # Learn data characteristics
+│   ├── normalization_encoding.py            # Normalization to prevent bias and skewed figures and encoding for catergorical data
+│   └── train_test_split.py            # Define training and testing datasets                    
 │
-├── data_processing/              # 🧹 Data ingestion, cleaning & feature engineering
+├── data_processing/              # Data ingestion, cleaning & feature engineering
 │   └── ...
 │
-├── model/                        # 🤖 Model training, tuning, and evaluation
+├── model/                        # Model training, tuning, and evaluation
 │   ├── models.py                 # Model definitions and training logic
 │   ├── fine_tuning.py            # Hyperparameter optimisation
 │   └── evaluation.py            # Metrics: AUC, F1, Precision, Recall, etc.
 │
-├── SHAP_interpretation/          # 🔍 Explainability layer — global & local SHAP analysis
+├── SHAP_interpretation/          # Explainability layer — global & local SHAP analysis
 │   └── SHAP.py
 │
-├── catboost_info/                # 📊 CatBoost training logs and metadata
+├── catboost_info/                # CatBoost training logs and metadata
 │
-├── output_storage/              # 💾 Saved models, predictions, and SHAP outputs
+├── output_storage/              # Saved models, predictions, and SHAP outputs
 │
 ├── README.md
 └── LICENSE
