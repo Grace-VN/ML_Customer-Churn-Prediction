@@ -172,7 +172,7 @@ ax.set_xlabel('Metric')
 ax.set_ylabel('Score')
 ax.set_xticks(x)
 ax.set_xticklabels(metric_lbls)
-ax.legend(loc='lower right')
+ax.legend(loc='upper right')
 ax.grid(axis='y', alpha=0.3)
 plt.tight_layout()
 
@@ -213,35 +213,55 @@ plt.show()
 # ==============================
 # Plot 3: Per-Model Radar Chart — Mean of All Metrics
 # ==============================
-from matplotlib.patches import FancyArrowPatch
-import matplotlib.patheffects as pe
-
-radar_labels = metric_lbls
-num_vars     = len(radar_labels)
-angles       = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
-angles      += angles[:1]  # close the polygon
-
-fig3, axes3 = plt.subplots(2, 2, figsize=(12, 10),
-                            subplot_kw=dict(polar=True))
+fig3, axes3 = plt.subplots(3, 2, figsize=(12, 15),
+                           subplot_kw=dict(polar=True))
 axes3 = axes3.flatten()
 
-for ax_idx, (name, color) in enumerate(zip(names, colors)):
+# Hide the unused 6th axis
+axes3[-1].set_visible(False)
+# Models become radar axes
+radar_labels = names
+num_vars = len(radar_labels)
+angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+angles += angles[:1]   # close polygon
+for ax_idx, metric in enumerate(metric_keys):
     ax = axes3[ax_idx]
-    means = [summary_df.loc[summary_df["model"] == name, f"mean_{m}"].values[0]
-             for m in metric_keys]
-    values = means + means[:1]
-
+    # Collect metric values across models
+    values = [
+        summary_df.loc[
+            summary_df["model"] == model,
+            f"mean_{metric}"
+        ].values[0]
+        for model in names
+    ]
+    values += values[:1]
+    color = colors[ax_idx % len(colors)]
     ax.plot(angles, values, color=color, lw=2)
     ax.fill(angles, values, color=color, alpha=0.25)
-    ax.set_thetagrids(np.degrees(angles[:-1]), radar_labels, fontsize=10)
+    ax.set_thetagrids(
+        np.degrees(angles[:-1]),
+        radar_labels,
+        fontsize=10
+    )
     ax.set_ylim(0, 1)
-    ax.set_title(name, size=13, pad=14, color=color, fontweight='bold')
+    ax.set_title(
+        METRIC_LABELS[metric],
+        size=13,
+        pad=14,
+        color=color,
+        fontweight='bold'
+    )
     ax.grid(alpha=0.3)
-
-fig3.suptitle('Baseline Models — Metric Radar Charts', fontsize=14, y=1.01)
+fig3.suptitle(
+    'Baseline Models — Radar Charts by Metric',
+    fontsize=14,
+    y=1.02
+)
 plt.tight_layout()
-
-radar_path = os.path.join(IMAGE_DIR, "cv_baseline_radar_charts.png")
+radar_path = os.path.join(
+    IMAGE_DIR,
+    "cv_baseline_radar_by_metric.png"
+)
 fig3.savefig(radar_path, dpi=150, bbox_inches='tight')
-print(f"[Saved] Radar charts      → {radar_path}")
+print(f"[Saved] Radar charts → {radar_path}")
 plt.show()

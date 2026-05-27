@@ -101,12 +101,23 @@ print(f"[Saved] Target distribution     → {target_path}")
 # --- Churn Distribution Plot → Image ---
 fig, ax = plt.subplots(figsize=(6, 4))
 sns.countplot(x=df[target_col], ax=ax)
+# Add count labels on top of bars
+for p in ax.patches:
+    ax.annotate(
+        f'{int(p.get_height())}',
+        (p.get_x() + p.get_width() / 2, p.get_height() + 10),  # +10 offset
+        ha='center',
+        va='bottom',
+        fontsize=10
+    )
 ax.set_title("Customer Churn Distribution")
 ax.set_xlabel("Exited")
 ax.set_ylabel("Count")
 plt.tight_layout()
-
-churn_img_path = os.path.join(IMAGE_DIR, "eda_churn_distribution.png")
+churn_img_path = os.path.join(
+    IMAGE_DIR,
+    "eda_churn_distribution.png"
+)
 fig.savefig(churn_img_path, dpi=150, bbox_inches='tight')
 print(f"[Saved] Churn distribution plot → {churn_img_path}")
 plt.show()
@@ -141,7 +152,8 @@ print(f"[Saved] Correlation matrix      → {corr_path}")
 fig, ax = plt.subplots(figsize=(12, 8))
 sns.heatmap(
     correlation_matrix,
-    annot=False,
+    annot=True,
+    fmt=".2f",
     cmap='coolwarm',
     linewidths=0.5,
     ax=ax

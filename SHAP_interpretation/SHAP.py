@@ -62,13 +62,36 @@ plt.close()
 # ==============================
 # Plot 2: SHAP Bar Plot (Mean |SHAP|) → Image
 # ==============================
-fig, ax = plt.subplots()
-shap.summary_plot(shap_values, X_test_transform, plot_type='bar', show=False)
+fig, ax = plt.subplots(figsize=(8, 6))
+shap.summary_plot(
+    shap_values,
+    X_test_transform,
+    plot_type='bar',
+    show=False
+)
+# Get current axes created by SHAP
+ax = plt.gca()
+# Add values to right of bars
+for bar in ax.patches:
+    width = bar.get_width()
+    ax.text(
+        width + 0.001,
+        bar.get_y() + bar.get_height() / 2,
+        f"{width:.3f}",
+        va='center',
+        fontsize=8
+    )
 plt.tight_layout()
-
-bar_img_path = os.path.join(IMAGE_DIR, "shap_bar_plot.png")
-plt.savefig(bar_img_path, dpi=150, bbox_inches='tight')
-print(f"[Saved] SHAP bar plot          → {bar_img_path}")
+bar_img_path = os.path.join(
+    IMAGE_DIR,
+    "shap_bar_plot.png"
+)
+plt.savefig(
+    bar_img_path,
+    dpi=150,
+    bbox_inches='tight'
+)
+print(f"[Saved] SHAP bar plot → {bar_img_path}")
 plt.show()
 plt.close()
 

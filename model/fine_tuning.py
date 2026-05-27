@@ -226,16 +226,34 @@ plt.show(); plt.close()
 # Plot 2: Optuna Hyperparameter Importance
 # ==============================
 importances = optuna.importance.get_param_importances(study)
-
 fig2, ax2 = plt.subplots(figsize=(8, 5))
-ax2.barh(list(importances.keys())[::-1], list(importances.values())[::-1], color='steelblue')
+bars = ax2.barh(
+    list(importances.keys())[::-1],
+    list(importances.values())[::-1],
+    color='steelblue'
+)
+# Add values to the right of bars
+for bar in bars:
+    width = bar.get_width()
+    ax2.text(
+        width + 0.005,                         # slightly right of bar
+        bar.get_y() + bar.get_height() / 2,   # center vertically
+        f"{width:.3f}",
+        va='center',
+        fontsize=9
+    )
 ax2.set_title('Hyperparameter Importance — Optuna', fontsize=14)
 ax2.set_xlabel('Importance Score')
 ax2.grid(axis='x', alpha=0.3)
 plt.tight_layout()
-fig2.savefig(os.path.join(IMAGE_DIR, "optuna_hyperparameter_importance.png"), dpi=150, bbox_inches='tight')
-print(f"[Saved] Hyperparameter importance    → optuna_hyperparameter_importance.png")
-plt.show(); plt.close()
+fig2.savefig(
+    os.path.join(IMAGE_DIR, "optuna_hyperparameter_importance.png"),
+    dpi=150,
+    bbox_inches='tight'
+)
+print(f"[Saved] Hyperparameter importance → optuna_hyperparameter_importance.png")
+plt.show()
+plt.close()
 
 # ==============================
 # Plot 3: Grouped Bar — Baseline vs Tuned (all metrics)

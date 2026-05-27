@@ -1,8 +1,8 @@
 parameter,value
-learning_rate,0.05179402290965032
-iterations,218.0
+learning_rate,0.05242907922749028
+iterations,287.0
 depth,4.0
-l2_leaf_reg,7.9835031715268
-bagging_temperature,0.33760932411172356
+l2_leaf_reg,2.301941967387121
+bagging_temperature,0.23922285770912294
 border_count,69.0
-random_strength,0.01515441444365341
+random_strength,0.07837908230773703
