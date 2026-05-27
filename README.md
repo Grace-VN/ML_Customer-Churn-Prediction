@@ -255,14 +255,33 @@ The dependence plot illustrates how changes in `EstimatedSalary` influenced SHAP
 
 ![SHAP Dependence Plot](output_storage/images/shap_dependence_EstimatedSalary.png)
 
-### Key Observations
+### Key Insights
 
-- The relationship between `EstimatedSalary` and churn prediction was nonlinear.
-- Moderate-to-high salary values tended to slightly increase SHAP values, contributing positively toward churn prediction.
-- Extremely low salary values often produced negative SHAP values, reducing predicted churn probability.
-- The spread of points indicates interaction effects between `EstimatedSalary` and other variables such as `Age`.
+- Lower salary values are generally associated with negative SHAP values, indicating that customers with lower estimated salaries tend to reduce the predicted churn probability.
 
-Although `EstimatedSalary` was not among the strongest predictors, the dependence plot reveals subtle interaction patterns captured by the model.
+- As salary increases toward the middle and upper ranges, SHAP values gradually become positive, suggesting that higher-income customers contribute more strongly toward churn prediction.
+
+- The relationship is not strictly linear.  
+  Around the middle salary range, the SHAP contribution transitions smoothly from negative to positive values, indicating a threshold-like behavioral effect captured by the model.
+
+- At very high salary values, the spread of SHAP values increases significantly.  
+  This wider dispersion suggests that salary alone is insufficient to determine churn behavior and that interaction effects with other variables become more influential in this region.
+
+- Several high-salary observations still produce near-zero or negative SHAP values, indicating heterogeneous customer behavior among high-income customers.
+
+- The color gradient shows interaction effects between `EstimatedSalary` and `Age`.  
+  Older customers (pink/red points) generally exhibit higher positive SHAP values at similar salary levels compared to younger customers (blue points), suggesting that age amplifies the salary-related churn effect.
+
+- The vertical clustering observed near extreme salary values may indicate sparse observations or localized decision boundaries learned by the tree-based model.
+
+### Overall Interpretation
+
+The model appears to capture complex behavioral patterns where:
+- salary influences churn probability differently across demographic groups,
+- customer age moderates the effect of salary,
+- and churn risk increases more noticeably for certain high-income customer segments.
+
+This demonstrates the ability of tree-based ensemble models to learn nonlinear interactions that traditional linear models may fail to capture.
 
 ---
 
