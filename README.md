@@ -160,7 +160,8 @@ This comparison helps identify the most suitable model for balancing predictive 
 | **Precision** | Percentage of predicted churners that were actually churners |
 | **Recall** | Percentage of actual churners correctly identified |
 | **F1 Score** | Harmonic mean of Precision and Recall |
-| **Confusion Matrix** | Breakdown of TP, FP, TN, and FN predictions |
+| **Accuracy** | Measures the overall percentage of correctly classified instances |
+
 ![Baseline Model Comparison](output_storage/images/cv_baseline_grouped_bar.png)
 > **Business Insight:**  
 > In customer churn prediction, **Recall** is often prioritised because missing a potential churner can lead to customer loss, while falsely flagging a loyal customer is usually less costly.
