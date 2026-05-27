@@ -134,42 +134,36 @@ Raw Customer Data
 
 ---
 
-## 🤖 Models Used
+## 🧠 Model Selection Summary
 
-### CatBoost (Primary)
+A combination of traditional and advanced ensemble learning algorithms was selected to provide a comprehensive comparison of classification performance for customer churn prediction.
 
-CatBoost is a gradient boosting algorithm developed by Yandex, particularly effective for:
+- **Tree-based boosting models** such as **XGBoost**, **LightGBM**, and **CatBoost** were chosen because they are highly effective for structured/tabular datasets and can capture complex nonlinear relationships between customer attributes and churn behaviour.
 
-- **Categorical features** — handles them natively without manual encoding
-- **Imbalanced datasets** — robust performance without heavy preprocessing
-- **SHAP integration** — first-class support for fast, exact SHAP value computation
+- **KNN** was included as a baseline distance-based classifier to compare simpler instance-based learning against ensemble boosting approaches.
 
-```python
-# Simplified example of what model training looks like
-from catboost import CatBoostClassifier
+- The selected models provide diversity in:
+  - Learning mechanisms
+  - Computational complexity
+  - Feature handling capabilities
+  - Interpretability and scalability
 
-model = CatBoostClassifier(
-    iterations=500,
-    depth=6,
-    learning_rate=0.05,
-    eval_metric='AUC',
-    early_stopping_rounds=50,
-    verbose=100
-)
-model.fit(X_train, y_train, cat_features=cat_cols, eval_set=(X_val, y_val))
-```
+This comparison helps identify the most suitable model for balancing predictive accuracy and business interpretability in churn analysis.
 
-### Evaluation Metrics
+---
 
-| Metric | Why It Matters for Churn |
+## 📊 Evaluation Metrics
+
+| Metric | Description |
 |---|---|
-| **AUC-ROC** | Measures overall ranking power — how well the model separates churners from stayers |
-| **Precision** | Of those predicted to churn, how many actually did? (Cost of false alarms) |
-| **Recall** | Of those who actually churned, how many did we catch? (Cost of missing churners) |
-| **F1 Score** | Harmonic mean of Precision & Recall — balanced performance measure |
-| **Confusion Matrix** | Full breakdown of TP, FP, TN, FN predictions |
-
-> **Business note:** In churn problems, **Recall is often prioritised** — it's worse to miss a churner than to flag a loyal customer unnecessarily.
+| **AUC-ROC** | Measures the model’s ability to distinguish between churners and non-churners across all thresholds |
+| **Precision** | Percentage of predicted churners that were actually churners |
+| **Recall** | Percentage of actual churners correctly identified |
+| **F1 Score** | Harmonic mean of Precision and Recall |
+| **Confusion Matrix** | Breakdown of TP, FP, TN, and FN predictions |
+![Baseline Model Comparison](output_storage/images/cv_baseline_grouped_bar.png)
+> **Business Insight:**  
+> In customer churn prediction, **Recall** is often prioritised because missing a potential churner can lead to customer loss, while falsely flagging a loyal customer is usually less costly.
 
 ---
 
