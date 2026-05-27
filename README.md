@@ -66,14 +66,12 @@ This is an end-to-end supervised binary classification pipeline built in Python.
 
 ```
 ML_Customer-Churn-Prediction/
-│
-├── run.py
-│   ├── EDA.py                 # Learn data characteristics
-│   ├── normalization_encoding.py            # Normalization to prevent bias and skewed figures and encoding for catergorical data
-│   └── train_test_split.py            # Define training and testing datasets                    
+│              
 │
 ├── data_processing/              # Data ingestion, cleaning & feature engineering
-│   └── ...
+│   ├── EDA.py                 # Learn data characteristics
+│   ├── normalization_encoding.py            # Normalization to prevent bias and skewed figures and encoding for catergorical data
+│   └── train_test_split.py            # Define training and testing datasets    
 │
 ├── model/                        # Model training, tuning, and evaluation
 │   ├── models.py                 # Model definitions and training logic
@@ -87,6 +85,7 @@ ML_Customer-Churn-Prediction/
 │
 ├── output_storage/              # Saved models, predictions, and SHAP outputs
 │
+├── run.py                     #To run model wholly
 ├── README.md
 └── LICENSE
 ```
