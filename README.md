@@ -163,6 +163,7 @@ This comparison helps identify the most suitable model for balancing predictive 
 | **Accuracy** | Measures the overall percentage of correctly classified instances |
 
 ![Baseline Model Comparison](output_storage/images/cv_baseline_grouped_bar.png)
+![ROC Curve](output_storage/images/roc_curve.png)
 > **Business Insight:**  
 > In customer churn prediction, **Recall** is often prioritised because missing a potential churner can lead to customer loss, while falsely flagging a loyal customer is usually less costly.
 
