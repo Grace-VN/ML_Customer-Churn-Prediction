@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+catboost_info/
+output_storage/
+*.dll
+*.pkl
+*.modelgit add .gitignore
+git commit -m "Remove venv and add gitignore"
