@@ -1,0 +1,5 @@
+metric,value
+True Negatives (TN),2275
+False Positives (FP),106
+False Negatives (FN),209
+True Positives (TP),410

@@ -1,0 +1,9 @@
+metric,value
+Cost of FN (missed churn),410.0
+Cost of FP (false alarm),50.0
+Total FN Loss,85690.0
+Total FP Cost,5300.0
+Total Model Cost,90990.0
+Baseline Cost (no model),253790.0
+Cost Avoided,162800.0
+ROI (%),178.9
