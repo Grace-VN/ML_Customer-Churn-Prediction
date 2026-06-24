@@ -66,14 +66,12 @@ This is an end-to-end supervised binary classification pipeline built in Python.
 
 ```
 ML_Customer-Churn-Prediction/
-│
-├── run.py
-│   ├── EDA.py                 # Learn data characteristics
-│   ├── normalization_encoding.py            # Normalization to prevent bias and skewed figures and encoding for catergorical data
-│   └── train_test_split.py            # Define training and testing datasets                    
+│              
 │
 ├── data_processing/              # Data ingestion, cleaning & feature engineering
-│   └── ...
+│   ├── EDA.py                 # Learn data characteristics
+│   ├── normalization_encoding.py            # Normalization to prevent bias and skewed figures and encoding for catergorical data
+│   └── train_test_split.py            # Define training and testing datasets    
 │
 ├── model/                        # Model training, tuning, and evaluation
 │   ├── models.py                 # Model definitions and training logic
@@ -87,6 +85,7 @@ ML_Customer-Churn-Prediction/
 │
 ├── output_storage/              # Saved models, predictions, and SHAP outputs
 │
+├── run.py                     #To run model wholly
 ├── README.md
 └── LICENSE
 ```
@@ -135,107 +134,173 @@ Raw Customer Data
 
 ---
 
-## 🤖 Models Used
+## 🧠 Model Selection Summary
 
-### CatBoost (Primary)
+A combination of traditional and advanced ensemble learning algorithms was selected to provide a comprehensive comparison of classification performance for customer churn prediction.
 
-CatBoost is a gradient boosting algorithm developed by Yandex, particularly effective for:
+- **Tree-based boosting models** such as **XGBoost**, **LightGBM**, and **CatBoost** were chosen because they are highly effective for structured/tabular datasets and can capture complex nonlinear relationships between customer attributes and churn behaviour.
 
-- **Categorical features** — handles them natively without manual encoding
-- **Imbalanced datasets** — robust performance without heavy preprocessing
-- **SHAP integration** — first-class support for fast, exact SHAP value computation
+- **KNN** was included as a baseline distance-based classifier to compare simpler instance-based learning against ensemble boosting approaches.
 
-```python
-# Simplified example of what model training looks like
-from catboost import CatBoostClassifier
+- The selected models provide diversity in:
+  - Learning mechanisms
+  - Computational complexity
+  - Feature handling capabilities
+  - Interpretability and scalability
 
-model = CatBoostClassifier(
-    iterations=500,
-    depth=6,
-    learning_rate=0.05,
-    eval_metric='AUC',
-    early_stopping_rounds=50,
-    verbose=100
-)
-model.fit(X_train, y_train, cat_features=cat_cols, eval_set=(X_val, y_val))
-```
+This comparison helps identify the most suitable model for balancing predictive accuracy and business interpretability in churn analysis.
 
-### Evaluation Metrics
+---
 
-| Metric | Why It Matters for Churn |
+## 📊 Evaluation Metrics
+
+| Metric | Description |
 |---|---|
-| **AUC-ROC** | Measures overall ranking power — how well the model separates churners from stayers |
-| **Precision** | Of those predicted to churn, how many actually did? (Cost of false alarms) |
-| **Recall** | Of those who actually churned, how many did we catch? (Cost of missing churners) |
-| **F1 Score** | Harmonic mean of Precision & Recall — balanced performance measure |
-| **Confusion Matrix** | Full breakdown of TP, FP, TN, FN predictions |
+| **AUC-ROC** | Measures the model’s ability to distinguish between churners and non-churners across all thresholds |
+| **Precision** | Percentage of predicted churners that were actually churners |
+| **Recall** | Percentage of actual churners correctly identified |
+| **F1 Score** | Harmonic mean of Precision and Recall |
+| **Accuracy** | Measures the overall percentage of correctly classified instances |
 
-> **Business note:** In churn problems, **Recall is often prioritised** — it's worse to miss a churner than to flag a loyal customer unnecessarily.
+![Baseline Model Comparison](output_storage/images/cv_baseline_grouped_bar.png)
+![ROC Curve](output_storage/images/roc_curve.png)
+> **Business Insight:**  
+> In customer churn prediction, **Recall** is often prioritised because missing a potential churner can lead to customer loss, while falsely flagging a loyal customer is usually less costly.
 
 ---
 
-## 🔍 Model Interpretability — SHAP
+## 🔍 SHAP Explainability Analysis
 
-The `SHAP_interpretation/` module provides the "why" behind every prediction.
+To improve model interpretability, SHAP (SHapley Additive exPlanations) was applied to explain how each feature contributed to the churn prediction outcomes of the final tree-based classification model.
 
-### What SHAP Does
-
-SHAP assigns each feature a contribution score to the model's output for a specific prediction. Based on Shapley values from cooperative game theory, it is mathematically consistent and model-agnostic.
+The analysis was performed using `TreeExplainer`, which is specifically designed for ensemble tree models and provides both global and local feature importance interpretations.
 
 ```python
-import shap
-
-explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(X_test)
-
-# Global feature importance
-shap.summary_plot(shap_values, X_test)
-
-# Individual customer explanation
-shap.waterfall_plot(shap.Explanation(
-    values=shap_values[i],
-    base_values=explainer.expected_value,
-    data=X_test.iloc[i]
-))
+explainer   = shap.TreeExplainer(model)
+shap_values = explainer.shap_values(X_test_transform)
 ```
 
-### Types of SHAP Analysis in This Project
+The generated SHAP outputs include:
 
-| Analysis Type | Plot | Business Use |
-|---|---|---|
-| **Global importance** | Beeswarm / bar chart | Which features drive churn most across all customers? |
-| **Local explanation** | Waterfall / force plot | Why is *this specific customer* flagged as at risk? |
-| **Feature interaction** | Dependency plot | How do two features interact (e.g. Tenure × Contract type)? |
-
-### Example Insight (Typical Churn Patterns)
-
-```
-Customer #4821 — Churn Probability: 87%
-
-Base rate:           +0.23  (population avg churn rate)
-Contract: Month-to-Month  +0.31  ↑ increases churn risk
-Tenure: 2 months     +0.18  ↑ new customer, high risk
-MonthlyCharges: $89  +0.12  ↑ high bill relative to usage
-Has TechSupport: No  +0.09  ↑ no support = frustration risk
-─────────────────────────────
-Predicted probability: 0.87
-```
-
-> **Business action:** Contact this customer with a contract upgrade offer or loyalty discount before next billing cycle.
+- Individual SHAP values for each prediction
+- Mean absolute SHAP feature importance
+- SHAP summary plot
+- SHAP bar plot
+- SHAP dependence plot
 
 ---
 
-## 📈 Key Business Insights
+## 📊 Global Feature Importance (Mean Absolute SHAP)
 
-Based on typical findings in churn models of this type:
+The mean absolute SHAP values indicate the overall contribution strength of each feature toward churn prediction.
 
-1. **Contract type is the strongest signal** — month-to-month customers churn at dramatically higher rates than annual/biennial contract holders
+| Feature | Mean Absolute SHAP Value | Interpretation |
+|---|---|---|
+| **NumOfProducts** | 1.254 | Strongest predictor of customer churn |
+| **Age** | 1.057 | Older customers showed higher churn influence |
+| **IsActiveMember** | 0.532 | Active membership strongly reduced churn probability |
+| **Gender (Male)** | 0.412 | Gender had moderate predictive influence |
+| **Geography (Germany)** | 0.315 | German customers showed higher churn tendency |
+| **Balance** | 0.216 | Higher account balances contributed to churn prediction |
+| **CreditScore** | 0.110 | Lower influence but still contributed to prediction |
+| **EstimatedSalary** | 0.091 | Weak nonlinear contribution to churn |
+| **Tenure** | 0.072 | Longer tenure slightly reduced churn likelihood |
+| **HasCrCard** | 0.011 | Minimal impact on prediction |
+| **Geography (Spain)** | 0.005 | Negligible influence on churn |
 
-2. **Early tenure is the danger zone** — customers in their first 3–6 months are disproportionately likely to leave; early onboarding interventions are high-ROI
+---
 
-3. **High monthly charges without perceived value** — customers paying more without premium services (e.g. no Tech Support, no Online Security) show elevated churn
+## 📈 SHAP Summary Plot Interpretation
 
-4. **Service quality gaps drive churn** — lack of support services is consistently associated with higher churn probability regardless of spend level
+The SHAP summary plot visualises both:
+- Feature importance ranking
+- Directional impact of feature values on churn prediction
+
+### Key Findings
+
+- **NumOfProducts** was the most influential feature.  
+  Customers with certain product ownership patterns had significantly higher positive SHAP values, meaning they were more likely to churn.
+
+- **Age** showed a strong positive relationship with churn.  
+  Higher age values generally increased the model output toward churn prediction.
+
+- **IsActiveMember** displayed negative SHAP values for active customers, indicating that active members were less likely to churn.
+
+- **Germany geography encoding** contributed positively toward churn prediction, suggesting customers from Germany had a relatively higher churn tendency compared to other regions.
+
+- **Balance** showed moderate influence where higher balances slightly increased churn likelihood.
+
+- Features such as **HasCrCard** and **Geography_Spain** had SHAP values concentrated near zero, indicating minimal predictive contribution.
+
+---
+
+## 📊 SHAP Bar Plot Interpretation
+
+The SHAP bar plot presents the average absolute contribution of each feature across all predictions.
+
+![SHAP Bar Plot](output_storage/images/shap_bar_plot.png)
+
+The results confirm that:
+- Customer product usage behavior (**NumOfProducts**) was the dominant churn driver.
+- Demographic information such as **Age** and **Geography** played important roles.
+- Behavioral engagement features like **IsActiveMember** strongly affected retention outcomes.
+- Financial-related variables contributed less compared to behavioral indicators.
+
+This indicates that customer engagement and service usage patterns were more informative than purely financial attributes.
+
+---
+
+## 📉 SHAP Dependence Plot — Estimated Salary
+
+The dependence plot illustrates how changes in `EstimatedSalary` influenced SHAP values and model predictions.
+
+![SHAP Dependence Plot](output_storage/images/shap_dependence_EstimatedSalary.png)
+
+### Key Insights
+
+- Lower salary values are generally associated with negative SHAP values, indicating that customers with lower estimated salaries tend to reduce the predicted churn probability.
+
+- As salary increases toward the middle and upper ranges, SHAP values gradually become positive, suggesting that higher-income customers contribute more strongly toward churn prediction.
+
+- The relationship is not strictly linear.  
+  Around the middle salary range, the SHAP contribution transitions smoothly from negative to positive values, indicating a threshold-like behavioral effect captured by the model.
+
+- At very high salary values, the spread of SHAP values increases significantly.  
+  This wider dispersion suggests that salary alone is insufficient to determine churn behavior and that interaction effects with other variables become more influential in this region.
+
+- Several high-salary observations still produce near-zero or negative SHAP values, indicating heterogeneous customer behavior among high-income customers.
+
+- The color gradient shows interaction effects between `EstimatedSalary` and `Age`.  
+  Older customers (pink/red points) generally exhibit higher positive SHAP values at similar salary levels compared to younger customers (blue points), suggesting that age amplifies the salary-related churn effect.
+
+- The vertical clustering observed near extreme salary values may indicate sparse observations or localized decision boundaries learned by the tree-based model.
+
+### Overall Interpretation
+
+The model appears to capture complex behavioral patterns where:
+- salary influences churn probability differently across demographic groups,
+- customer age moderates the effect of salary,
+- and churn risk increases more noticeably for certain high-income customer segments.
+
+This demonstrates the ability of tree-based ensemble models to learn nonlinear interactions that traditional linear models may fail to capture.
+
+---
+
+## 🧠 Overall SHAP Interpretation
+
+The SHAP analysis demonstrated that the final model primarily relied on:
+- Customer engagement behavior
+- Product ownership patterns
+- Demographic characteristics
+
+rather than purely financial variables.
+
+This provides strong business interpretability and helps organisations identify:
+- High-risk customer groups
+- Important retention drivers
+- Features most associated with churn behaviour
+
+The explainability analysis also increases trust in the predictive model by making feature contributions transparent and interpretable.
 
 ---
 
